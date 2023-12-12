@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import tkinter.scrolledtext as st 
 from experta import *
 from PIL import Image, ImageTk
 from rules import ExpertSystem, Diagnosis
@@ -10,19 +11,12 @@ class Interface(tk.Tk):
         self.check_vars = {}
         self.backgroundcolor = "#fdefb0"
         self.configure(bg=self.backgroundcolor)
-        
-        self.check_var_humo = tk.BooleanVar()
-        self.check_var_luces = tk.BooleanVar()
-        self.check_var_arranque = tk.BooleanVar()
-        self.check_var_velocidad = tk.BooleanVar()
-        self.check_var_vibracion = tk.BooleanVar()
-        self.check_var_llantas = tk.BooleanVar()
-        
+               
         self.title("Sistema Experto Automotriz")
-        self.geometry("350x700")
+        self.geometry("350x730")
 
-        self.label = tk.Label(self, text="Seleccione los problemas del automóvil:", bg=self.backgroundcolor)
-        self.label.grid(pady=10)
+        self.label = tk.Label(self, text="Seleccione los problemas del automóvil",font=("Arial", 12), bg=self.backgroundcolor)
+        self.label.grid(pady=10,columnspan=2)
 
         self.checkboxes={}
         symptoms = ["motor_ruidoso", "frenos_ineficientes", "luces_fallando", "problemas_combustible", "problemas_arranque", "vibraciones_al_frenar", "pérdida_de_potencia_del_motor", "temperatura_del_motor_elevada", "ruidos_anormales_al_girar_la_dirección", "consumo_excesivo_de_combustible", "fugas_de_líquidos_bajo_el_vehículo", "desgaste_desigual_de_los_neumáticos"]
@@ -40,10 +34,17 @@ class Interface(tk.Tk):
                 style="TCheckbutton",
                 takefocus=0
             )
-            checkbox.grid(row=i, column=0, padx=10, pady=5, sticky=tk.W)
-
-        self.diagnosis_label = tk.Label(self, text="", bg=self.backgroundcolor)
-        self.diagnosis_label.grid(row=i+2, column=0, columnspan=2, pady=5)
+            checkbox.grid(row=i, column=0, padx=10, pady=2, sticky=tk.W)
+       
+        self.text_area = st.ScrolledText(self, 
+                            width = 45,  
+                            height = 8,  
+                            font = ("Arial", 
+                                    9),
+                            background=self.backgroundcolor, borderwidth=0) 
+        self.text_area.grid(row=i+2, column=0, columnspan=2, pady=5)
+        self.text_area.insert(tk.END, f"Resultados del diagnóstico...")
+        
 
         self.diagnose_button = tk.Button(
             self, 
@@ -79,15 +80,17 @@ class Interface(tk.Tk):
         try:
             if engine.facts and diagnosis_fact and isinstance(diagnosis_fact, Diagnosis):
                 issue = diagnosis_fact['problem']
-                possible_causes = "\n".join(diagnosis_fact['possible_causes'])
-                possible_solutions = "\n".join(diagnosis_fact['possible_solutions'])
-                diagnosis_result = f"{issue}:\nPosibles Causas: {possible_causes}\nPosibles Soluciones: {possible_solutions}"
+                possible_causes = "\n - ".join(diagnosis_fact['possible_causes'])
+                possible_solutions = "\n - ".join(diagnosis_fact['possible_solutions'])
+                diagnosis_result = f"{issue}\nPosibles Causas: \n - {possible_causes}\n\n Posibles Soluciones:\n - {possible_solutions}"
             else:
                 diagnosis_result = "No se pudo diagnosticar el problema."
         except KeyError:
             diagnosis_result = "No se pudo diagnosticar el problema."
 
-        self.diagnosis_label.config(text=f"Diagnóstico:\n{diagnosis_result}")
+        self.text_area.delete(1.0, tk.END)
+        self.text_area.insert(tk.END, f"Resumen del diagnóstico \n{diagnosis_result}")
+        
 
 if __name__ == "__main__":
     app = Interface()
